@@ -3,16 +3,16 @@ package ftp;
 // this class parses the PASV response from the server to extract ip and port
 // server sends the address in format: (h1,h2,h3,h4,p1,p2)
 // we need to convert that into a usable ip string and port number
-public class FTPParser {
+public class PassiveAddressParser {
     public final String ip;
     public final int port;
 
-    private FTPParser(String ip, int port) {
+    private PassiveAddressParser(String ip, int port) {
         this.ip = ip;
         this.port = port;
     }
 
-    public static FTPParser parse(FTPResponse response) {
+    public static PassiveAddressParser parse(ResponseParser response) {
         String raw = response.message;
 
         // extract everything between the parentheses then split by comma
@@ -26,7 +26,7 @@ public class FTPParser {
         // to get original port number: p1 * 256 + p2 (because one byte = 0 to 255, so base 256)
         int port = Integer.parseInt(parts[4].trim()) * 256 + Integer.parseInt(parts[5].trim());
 
-        return new FTPParser(ip, port);
+        return new PassiveAddressParser(ip, port);
     }
 
     @Override

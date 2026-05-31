@@ -19,8 +19,8 @@ public class FTPClient {
     }
 
     // validate the response code
-    private FTPResponse expect(int code) throws IOException {
-        FTPResponse response = FTPResponse.parse(controlIn);
+    private ResponseParser expect(int code) throws IOException {
+        ResponseParser response = ResponseParser.parse(controlIn);
         System.out.println("<<< [" + code + "] " + response);
         if (!response.is(code)) throw new FTPException(response);
         return response;
@@ -28,7 +28,7 @@ public class FTPClient {
 
     // mkdir is the only command that accepts two codes (257 = created, 550 = already exists)
     private void expectMkd() throws IOException {
-        FTPResponse response = FTPResponse.parse(controlIn);
+        ResponseParser response = ResponseParser.parse(controlIn);
         System.out.println("<<< [257/550] " + response);
         if (!response.is(257) && !response.is(550)) throw new FTPException(response); // anything else is a real error
     }
@@ -56,7 +56,7 @@ public class FTPClient {
         send("USER " + username);
         expect(331);                              // server asks for password
         send("PASS " + password);
-        FTPResponse response = FTPResponse.parse(controlIn);  // read login result manually to distinguish 530
+        ResponseParser response = ResponseParser.parse(controlIn);  // read login result manually to distinguish 530
         if (response.is(530)) throw new FTPException(response);   // wrong credentials
         if (!response.is(230)) throw new FTPException(response);  // anything else unexpected
         System.out.println();
@@ -65,7 +65,7 @@ public class FTPClient {
     public String pwd() throws IOException {
         System.out.println("[PWD]");
         send("PWD");
-        FTPResponse response = expect(257);     // 257 carries the current path in quotes
+        ResponseParser response = expect(257);     // 257 carries the current path in quotes
         System.out.println();
         // response format: 257 "/some/path" is current directory
         String msg = response.message;
@@ -91,9 +91,9 @@ public class FTPClient {
 
     private Socket openDataConnection(int retriesLeft, int attempt) throws IOException {
         send("PASV");
-        FTPResponse response = expect(227);                 // 227 = entering passive mode, contains ip+port
+        ResponseParser response = expect(227);                 // 227 = entering passive mode, contains ip+port
 
-        FTPParser address = FTPParser.parse(response);      // extract ip and port from PASV response
+        PassiveAddressParser address = PassiveAddressParser.parse(response);      // extract ip and port from PASV response
         System.out.println("    Address: " + address);
 
         Socket dataSocket = new Socket();                   // create unconnected socket so we can set a timeout

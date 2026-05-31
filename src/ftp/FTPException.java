@@ -11,7 +11,7 @@ public class FTPException extends java.io.IOException {
 
     // take the full FTPResponse and store the code
     // pass the response string as the exception message so it shows in stack traces
-    public FTPException(FTPResponse response) {
+    public FTPException(ResponseParser response) {
         super(response.toString());
         this.code = response.code;
     }
