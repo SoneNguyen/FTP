@@ -1,7 +1,7 @@
 package gui;
 
-import ftp.FTPClient;
-import ftp.FTPException;
+import ftp.Client;
+import ftp.Exception;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -37,7 +37,7 @@ public class App extends Application {
     private static final String SIDEBAR    = "-fx-background-color: #f5f5f5; -fx-border-color: #cccccc; -fx-padding: 6 5 6 5;";
 
     // state
-    private FTPClient client  = new FTPClient();
+    private Client client  = new Client();
     private boolean   logOpen = false;
 
     private final TextArea              logArea      = new TextArea();
@@ -68,7 +68,7 @@ public class App extends Application {
                 String[] p = line.trim().split("\\s+", 9);
                 if (p.length < 9) return null; // malformed line, skip it
                 return new RemoteFile(p[0], p[4], p[5] + " " + p[6] + " " + p[7], p[8], line);
-            } catch (Exception e) { return null; }
+            } catch (java.lang.Exception e) { return null; }
         }
 
         public boolean isDirectory()   { return permissions.startsWith("d"); }
@@ -163,7 +163,7 @@ public class App extends Application {
                         stage.setWidth(1050);
                         stage.setHeight(680);
                     });
-                } catch (FTPException ex) {
+                } catch (Exception ex) {
                     // server said no (e.g. 530 wrong password)
                     Platform.runLater(() -> {
                         errLbl.setStyle("-fx-text-fill: #cc0000; -fx-font-family: 'Monospaced'; -fx-font-size: 11;");
@@ -322,7 +322,7 @@ public class App extends Application {
         disconnectBtn.setOnAction(e ->
                 ftpThread(() -> {
                     client.quit();
-                    client = new FTPClient(); // reset client so next login starts fresh
+                    client = new Client(); // reset client so next login starts fresh
                     Platform.runLater(() -> {
                         stage.setScene(loginScene(stage));
                         stage.setResizable(false);

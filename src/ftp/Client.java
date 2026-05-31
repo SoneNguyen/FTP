@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FTPClient {
+public class Client {
 
     Socket controlSocket;
     BufferedReader controlIn;
@@ -22,7 +22,7 @@ public class FTPClient {
     private ResponseParser expect(int code) throws IOException {
         ResponseParser response = ResponseParser.parse(controlIn);
         System.out.println("<<< [" + code + "] " + response);
-        if (!response.is(code)) throw new FTPException(response);
+        if (!response.is(code)) throw new Exception(response);
         return response;
     }
 
@@ -30,7 +30,7 @@ public class FTPClient {
     private void expectMkd() throws IOException {
         ResponseParser response = ResponseParser.parse(controlIn);
         System.out.println("<<< [257/550] " + response);
-        if (!response.is(257) && !response.is(550)) throw new FTPException(response); // anything else is a real error
+        if (!response.is(257) && !response.is(550)) throw new Exception(response); // anything else is a real error
     }
 
     public void connect(String host) throws IOException {
@@ -57,8 +57,8 @@ public class FTPClient {
         expect(331);                              // server asks for password
         send("PASS " + password);
         ResponseParser response = ResponseParser.parse(controlIn);  // read login result manually to distinguish 530
-        if (response.is(530)) throw new FTPException(response);   // wrong credentials
-        if (!response.is(230)) throw new FTPException(response);  // anything else unexpected
+        if (response.is(530)) throw new Exception(response);   // wrong credentials
+        if (!response.is(230)) throw new Exception(response);  // anything else unexpected
         System.out.println();
     }
 
