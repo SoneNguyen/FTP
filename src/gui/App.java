@@ -26,41 +26,17 @@ import java.util.List;
 public class App extends Application {
 
     // shared styles
-    private static final String MONO = "Monospaced";
+    private static final String MONO       = "Monospaced";
+    private static final String BTN        = "-fx-background-color: #1a1a1a; -fx-text-fill: #ffffff; -fx-font-family: 'Monospaced'; -fx-cursor: hand; -fx-padding: 5 12 5 12;";
+    private static final String BTN_RED    = "-fx-background-color: #cc0000; -fx-text-fill: #ffffff; -fx-font-family: 'Monospaced'; -fx-cursor: hand; -fx-padding: 5 12 5 12;";
+    private static final String FIELD      = "-fx-font-family: 'Monospaced'; -fx-font-size: 11;";
+    private static final String STATUS_OK  = "-fx-font-family: 'Monospaced'; -fx-font-size: 10; -fx-background-color: #f0f0f0; -fx-padding: 3 6 3 6; -fx-border-color: #cccccc;";
+    private static final String STATUS_ERR = "-fx-font-family: 'Monospaced'; -fx-font-size: 10; -fx-background-color: #fff0f0; -fx-padding: 3 6 3 6; -fx-border-color: #cc0000; -fx-text-fill: #cc0000;";
+    private static final String DARK_BAR   = "-fx-background-color: #2a2a2a; -fx-text-fill: #ffffff; -fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-padding: 5 8 5 8;";
+    private static final String PATH_LABEL = "-fx-font-family: 'Monospaced'; -fx-font-size: 11; -fx-background-color: #2a2a2a; -fx-text-fill: #aaaaaa; -fx-padding: 5 8 5 4;";
+    private static final String SIDEBAR    = "-fx-background-color: #f5f5f5; -fx-border-color: #cccccc; -fx-padding: 6 5 6 5;";
 
-    private static final String BTN =
-            "-fx-background-color: #1a1a1a; -fx-text-fill: #ffffff; " +
-                    "-fx-font-family: 'Monospaced'; -fx-cursor: hand; -fx-padding: 5 12 5 12;";
-
-    private static final String BTN_RED =
-            "-fx-background-color: #cc0000; -fx-text-fill: #ffffff; " +
-                    "-fx-font-family: 'Monospaced'; -fx-cursor: hand; -fx-padding: 5 12 5 12;";
-
-    private static final String FIELD =
-            "-fx-font-family: 'Monospaced'; -fx-font-size: 11;";
-
-    private static final String STATUS_OK =
-            "-fx-font-family: 'Monospaced'; -fx-font-size: 10; " +
-                    "-fx-background-color: #f0f0f0; -fx-padding: 3 6 3 6; -fx-border-color: #cccccc;";
-
-    private static final String STATUS_ERR =
-            "-fx-font-family: 'Monospaced'; -fx-font-size: 10; " +
-                    "-fx-background-color: #fff0f0; -fx-padding: 3 6 3 6; " +
-                    "-fx-border-color: #cc0000; -fx-text-fill: #cc0000;";
-
-    private static final String DARK_BAR =
-            "-fx-background-color: #2a2a2a; -fx-text-fill: #ffffff; " +
-                    "-fx-font-family: 'Monospaced'; -fx-font-weight: bold; -fx-padding: 5 8 5 8;";
-
-    private static final String PATH_LABEL =
-            "-fx-font-family: 'Monospaced'; -fx-font-size: 11; " +
-                    "-fx-background-color: #2a2a2a; -fx-text-fill: #aaaaaa; -fx-padding: 5 8 5 4;";
-
-    private static final String SIDEBAR =
-            "-fx-background-color: #f5f5f5; -fx-border-color: #cccccc; " +
-                    "-fx-padding: 6 5 6 5;";
-
-    // --- state ---
+    // state
     private FTPClient client  = new FTPClient();
     private boolean   logOpen = false;
 
@@ -74,8 +50,7 @@ public class App extends Application {
     private File  localDir     = new File(System.getProperty("user.dir"));
     private Label localPathLbl;
 
-    // *Data models
-
+    // data models
     public static class RemoteFile {
         private final String permissions, size, date, name, rawLine;
 
@@ -91,7 +66,7 @@ public class App extends Application {
         public static RemoteFile parse(String line) {
             try {
                 String[] p = line.trim().split("\\s+", 9);
-                if (p.length < 9) return null;
+                if (p.length < 9) return null; // malformed line, skip it
                 return new RemoteFile(p[0], p[4], p[5] + " " + p[6] + " " + p[7], p[8], line);
             } catch (Exception e) { return null; }
         }
@@ -112,7 +87,7 @@ public class App extends Application {
             this.file = f;
             this.name = f.getName();
             this.type = f.isDirectory() ? "DIR" : "FILE";
-            this.size = f.isDirectory() ? "" : f.length() + " B";
+            this.size = f.isDirectory() ? "" : f.length() + " B"; // empty size for dirs
         }
 
         public String getType() { return type; }
@@ -121,19 +96,17 @@ public class App extends Application {
         public File   getFile() { return file; }
     }
 
-    // *App entry*
-
+    // app entry
     @Override
     public void start(Stage stage) {
-        redirectOutput();  // pipe System.out -> log area
+        redirectOutput();                  // pipe System.out -> log area
         stage.setTitle("FTP Client");
         stage.setScene(loginScene(stage));
         stage.setResizable(false);
         stage.show();
     }
 
-    // *Login scene
-
+    // login scene
     private Scene loginScene(Stage stage) {
         Label title = new Label("FTP Client");
         title.setFont(Font.font(MONO, FontWeight.BOLD, 22));
@@ -146,7 +119,7 @@ public class App extends Application {
         TextField     userFld = new TextField();     userFld.setPromptText("username");        userFld.setStyle(FIELD); userFld.setPrefWidth(200);
         PasswordField passFld = new PasswordField(); passFld.setPromptText("password");        passFld.setStyle(FIELD); passFld.setPrefWidth(200);
 
-        Label errLbl = new Label("");
+        Label  errLbl     = new Label("");
         errLbl.setFont(Font.font(MONO, 11));
         errLbl.setStyle("-fx-text-fill: #cc0000;");
 
@@ -185,7 +158,7 @@ public class App extends Application {
                     client.connect(hostFld.getText().trim());
                     client.login(userFld.getText().trim(), passFld.getText());
                     Platform.runLater(() -> {
-                        stage.setScene(mainScene(stage));
+                        stage.setScene(mainScene(stage)); // switch to main scene on success
                         stage.setResizable(true);
                         stage.setWidth(1050);
                         stage.setHeight(680);
@@ -215,12 +188,10 @@ public class App extends Application {
         return new Scene(root, 420, 340);
     }
 
-    // *Main scene
-
+    // main scene
     private Scene mainScene(Stage stage) {
 
-        // remote panel
-
+        // remote panel header bar
         Label remoteHdr = new Label("Remote:");
         remoteHdr.setStyle(DARK_BAR);
         remoteHdr.setMaxWidth(Double.MAX_VALUE);
@@ -254,22 +225,18 @@ public class App extends Application {
         remoteStatus.setMaxWidth(Double.MAX_VALUE);
 
         // remote sidebar buttons
-        Button cdUpBtn     = new Button("cd ..");      cdUpBtn.setStyle(BTN);
-        Button refreshBtn  = new Button("Refresh");    refreshBtn.setStyle(BTN);
-        Button downloadBtn = new Button("Download ▼"); downloadBtn.setStyle(BTN);
-        TextField newFolderFld = new TextField();
-        newFolderFld.setPromptText("folder name");
-        newFolderFld.setStyle(FIELD);
-        newFolderFld.setMaxWidth(Double.MAX_VALUE);
-        Button mkdirBtn    = new Button("New folder"); mkdirBtn.setStyle(BTN);
-        Button deleteBtn   = new Button("Delete");     deleteBtn.setStyle(BTN);
-        Button disconnectBtn = new Button("Disconnect"); disconnectBtn.setStyle(BTN_RED);
+        Button    cdUpBtn      = new Button("cd ..");      cdUpBtn.setStyle(BTN);
+        Button    refreshBtn   = new Button("Refresh");    refreshBtn.setStyle(BTN);
+        Button    downloadBtn  = new Button("Download ▼"); downloadBtn.setStyle(BTN);
+        TextField newFolderFld = new TextField();          newFolderFld.setPromptText("folder name"); newFolderFld.setStyle(FIELD); newFolderFld.setMaxWidth(Double.MAX_VALUE);
+        Button    mkdirBtn     = new Button("New folder"); mkdirBtn.setStyle(BTN);
+        Button    deleteBtn    = new Button("Delete");     deleteBtn.setStyle(BTN);
+        Button    disconnectBtn= new Button("Disconnect"); disconnectBtn.setStyle(BTN_RED);
 
         for (Button b : new Button[]{cdUpBtn, refreshBtn, downloadBtn, mkdirBtn, deleteBtn, disconnectBtn})
             b.setMaxWidth(Double.MAX_VALUE);
 
-        // spacer pushes Disconnect to the bottom
-        Region remoteSpacer = new Region();
+        Region remoteSpacer = new Region();                // spacer pushes Disconnect to the bottom
         VBox.setVgrow(remoteSpacer, Priority.ALWAYS);
 
         VBox remoteSidebar = new VBox(6,
@@ -280,8 +247,7 @@ public class App extends Application {
                 disconnectBtn
         );
         remoteSidebar.setStyle(SIDEBAR);
-        remoteSidebar.setPrefWidth(120);
-        remoteSidebar.setMinWidth(120);
+        remoteSidebar.setPrefWidth(120); remoteSidebar.setMinWidth(120);
         remoteSidebar.setAlignment(Pos.TOP_CENTER);
         VBox.setVgrow(remoteSidebar, Priority.ALWAYS);
 
@@ -289,16 +255,14 @@ public class App extends Application {
         VBox.setVgrow(remoteCenter, Priority.ALWAYS);
         HBox.setHgrow(remoteCenter, Priority.ALWAYS);
 
-        // sidebar LEFT, table right
-        HBox remoteBody = new HBox(remoteSidebar, remoteCenter);
+        HBox remoteBody = new HBox(remoteSidebar, remoteCenter); // sidebar LEFT, table right
         HBox.setHgrow(remoteBody, Priority.ALWAYS);
         VBox.setVgrow(remoteBody, Priority.ALWAYS);
 
         VBox leftPanel = new VBox(remoteBar, remoteBody);
         VBox.setVgrow(leftPanel, Priority.ALWAYS);
 
-        // ─remote button actions ─
-
+        // remote button actions
         cdUpBtn.setOnAction(e ->
                 ftpThread(() -> { client.cd(".."); refreshRemote(); }, "cd .."));
 
@@ -307,16 +271,16 @@ public class App extends Application {
 
         downloadBtn.setOnAction(e -> {
             RemoteFile sel = remoteTable.getSelectionModel().getSelectedItem();
-            if (sel == null)       { remoteError("No file selected."); return; }
+            if (sel == null)       { remoteError("No file selected.");           return; }
             if (sel.isDirectory()) { remoteError("Cannot download a directory."); return; }
 
             String remoteName = sel.getName();
-            String baseName = remoteName.contains("/")  ? remoteName.substring(remoteName.lastIndexOf("/")  + 1)
+            String baseName   = remoteName.contains("/")  ? remoteName.substring(remoteName.lastIndexOf("/")  + 1)
                     : remoteName.contains("\\") ? remoteName.substring(remoteName.lastIndexOf("\\") + 1)
                     : remoteName;
             File dest = new File(localDir, baseName);
 
-            // show the confirmation dialog on the FX thread, before touching any background thread
+            // show confirmation dialog on FX thread before touching background thread
             if (dest.exists()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
                         baseName + " already exists. Overwrite?", ButtonType.YES, ButtonType.NO);
@@ -324,11 +288,10 @@ public class App extends Application {
                 boolean confirmed = alert.showAndWait()
                         .map(btn -> btn == ButtonType.YES)
                         .orElse(false);
-                if (!confirmed) return;  // user said no, nothing to do
+                if (!confirmed) return; // user said no, nothing to do
             }
 
-            // only reach here if file doesn't exist, or user confirmed overwrite
-            String localPath = dest.getAbsolutePath();
+            String localPath = dest.getAbsolutePath(); // full path to write the file to
             ftpThread(() -> {
                 client.get(remoteName, localPath);
                 Platform.runLater(this::refreshLocalTable);
@@ -350,8 +313,8 @@ public class App extends Application {
             RemoteFile sel = remoteTable.getSelectionModel().getSelectedItem();
             if (sel == null) { remoteError("No file selected."); return; }
             ftpThread(() -> {
-                if (sel.isDirectory()) client.rmdir(sel.getName());
-                else                   client.delete(sel.getName());
+                if (sel.isDirectory()) client.rmdir(sel.getName());  // RMD for folders
+                else                   client.delete(sel.getName()); // DELE for files
                 refreshRemote();
             }, "delete");
         });
@@ -359,7 +322,7 @@ public class App extends Application {
         disconnectBtn.setOnAction(e ->
                 ftpThread(() -> {
                     client.quit();
-                    client = new FTPClient();
+                    client = new FTPClient(); // reset client so next login starts fresh
                     Platform.runLater(() -> {
                         stage.setScene(loginScene(stage));
                         stage.setResizable(false);
@@ -368,8 +331,7 @@ public class App extends Application {
                     });
                 }, "disconnect"));
 
-        // ─local panel ─
-
+        // local panel header bar
         Label localHdr = new Label("Local:");
         localHdr.setStyle(DARK_BAR);
         localHdr.setMaxWidth(Double.MAX_VALUE);
@@ -404,12 +366,11 @@ public class App extends Application {
             }
         });
 
-        // status bar shows item count only, path is already in the header bar
         localStatus.setStyle(STATUS_OK);
         localStatus.setMaxWidth(Double.MAX_VALUE);
-        refreshLocalTable();
+        refreshLocalTable(); // populate on load
 
-        // local sidebar buttons — symmetric to remote: cd .. top, upload mirror of download
+        // local sidebar buttons — symmetric to remote: cd .. top, upload mirrors download
         Button localCdUpBtn = new Button("cd ..");    localCdUpBtn.setStyle(BTN);
         Button uploadBtn    = new Button("Upload ▲"); uploadBtn.setStyle(BTN);
         Button logBtn       = new Button("Log ▼");    logBtn.setStyle(BTN);
@@ -417,8 +378,7 @@ public class App extends Application {
         for (Button b : new Button[]{localCdUpBtn, uploadBtn, logBtn})
             b.setMaxWidth(Double.MAX_VALUE);
 
-        // spacer mirrors the remote side so Log sits at the bottom
-        Region localSpacer = new Region();
+        Region localSpacer = new Region(); // spacer mirrors remote side so Log sits at the bottom
         VBox.setVgrow(localSpacer, Priority.ALWAYS);
 
         VBox localSidebar = new VBox(6,
@@ -428,8 +388,7 @@ public class App extends Application {
                 logBtn
         );
         localSidebar.setStyle(SIDEBAR);
-        localSidebar.setPrefWidth(120);
-        localSidebar.setMinWidth(120);
+        localSidebar.setPrefWidth(120); localSidebar.setMinWidth(120);
         localSidebar.setAlignment(Pos.TOP_CENTER);
         VBox.setVgrow(localSidebar, Priority.ALWAYS);
 
@@ -437,16 +396,14 @@ public class App extends Application {
         VBox.setVgrow(localCenter, Priority.ALWAYS);
         HBox.setHgrow(localCenter, Priority.ALWAYS);
 
-        // table left, sidebar RIGHT
-        HBox localBody = new HBox(localCenter, localSidebar);
+        HBox localBody = new HBox(localCenter, localSidebar); // table left, sidebar RIGHT
         HBox.setHgrow(localBody, Priority.ALWAYS);
         VBox.setVgrow(localBody, Priority.ALWAYS);
 
         VBox rightPanel = new VBox(localBar, localBody);
         VBox.setVgrow(rightPanel, Priority.ALWAYS);
 
-        // ─ local button actions ─
-
+        // local button actions
         localCdUpBtn.setOnAction(e -> {
             File parent = localDir.getParentFile();
             if (parent != null) {
@@ -458,7 +415,7 @@ public class App extends Application {
 
         uploadBtn.setOnAction(e -> {
             LocalFile sel = localTable.getSelectionModel().getSelectedItem();
-            if (sel == null)                 { remoteError("No file selected."); return; }
+            if (sel == null)                 { remoteError("No file selected.");          return; }
             if (sel.getFile().isDirectory()) { remoteError("Cannot upload a directory."); return; }
             // pass full local path to read from, but only the filename goes to STOR
             ftpThread(() -> {
@@ -471,12 +428,11 @@ public class App extends Application {
             logOpen = !logOpen;
             logArea.setVisible(logOpen);
             logArea.setManaged(logOpen);
-            logBtn.setText(logOpen ? "Log ▲" : "Log ▼");
+            logBtn.setText(logOpen ? "Log ▲" : "Log ▼"); // toggle arrow direction
         });
 
-        // SplitPane — both panels inside, divider sits in the center
-        SplitPane splitPane = new SplitPane(leftPanel, rightPanel);
-        splitPane.setDividerPositions(0.5);
+        SplitPane splitPane = new SplitPane(leftPanel, rightPanel); // both panels side by side
+        splitPane.setDividerPositions(0.5);                          // start at 50/50
         VBox.setVgrow(splitPane, Priority.ALWAYS);
 
         // log hidden until toggled
@@ -490,13 +446,12 @@ public class App extends Application {
         root.setStyle("-fx-background-color: #ffffff;");
         VBox.setVgrow(splitPane, Priority.ALWAYS);
 
-        // load remote listing right after login
-        ftpThread(this::refreshRemote, "initial ls");
+        ftpThread(this::refreshRemote, "initial ls"); // load remote listing right after login
 
         return new Scene(root, 1050, 680);
     }
 
-    // *Helpers*
+    // helpers
 
     // run FTP work on a background thread, show error in status bar on failure
     private void ftpThread(FTPTask task, String label) {
@@ -511,11 +466,11 @@ public class App extends Application {
 
     // fetch remote listing and update the table + path label
     private void refreshRemote() throws IOException {
-        List<String> lines = client.ls();
+        List<String>     lines = client.ls();
         List<RemoteFile> files = new ArrayList<>();
         for (String line : lines) {
             RemoteFile f = RemoteFile.parse(line);
-            if (f != null) files.add(f);
+            if (f != null) files.add(f); // skip malformed lines
         }
         String pwd = client.pwd();
         Platform.runLater(() -> {
@@ -525,26 +480,25 @@ public class App extends Application {
         });
     }
 
-    // list localDir, dirs first then alphabetical
+    // list localDir contents — dirs first, then alphabetical
     private void refreshLocalTable() {
         File[] files = localDir.listFiles();
         if (files == null) return;
         Arrays.sort(files, (a, b) -> {
-            if (a.isDirectory() != b.isDirectory()) return a.isDirectory() ? -1 : 1;
+            if (a.isDirectory() != b.isDirectory()) return a.isDirectory() ? -1 : 1; // dirs before files
             return a.getName().compareToIgnoreCase(b.getName());
         });
         List<LocalFile> items = new ArrayList<>();
         for (File f : files) items.add(new LocalFile(f));
         Platform.runLater(() -> {
             localTable.setItems(FXCollections.observableArrayList(items));
-            // just the count — path is already shown in the header bar
-            localStatus.setText(files.length + " items");
+            localStatus.setText(files.length + " items"); // path is already shown in the header bar
             if (localPathLbl != null) localPathLbl.setText(localDir.getAbsolutePath());
         });
     }
 
     private void remoteOk(String msg) {
-        Platform.runLater(() -> { remoteStatus.setStyle(STATUS_OK); remoteStatus.setText(msg); });
+        Platform.runLater(() -> { remoteStatus.setStyle(STATUS_OK);  remoteStatus.setText(msg); });
     }
 
     private void remoteError(String msg) {
@@ -566,15 +520,14 @@ public class App extends Application {
             @Override
             public void write(int b) {
                 char c = (char) b;
-                if (c == '\n') { appendLog(buf.toString()); buf.setLength(0); }
+                if (c == '\n') { appendLog(buf.toString()); buf.setLength(0); } // flush on newline
                 else buf.append(c);
             }
         });
         System.setOut(ps);
     }
 
-    // UI factories
-
+    // UI factory — avoids repeating TableColumn setup for every column
     private <T> TableColumn<T, String> col(String title, String prop, double width) {
         TableColumn<T, String> c = new TableColumn<>(title);
         c.setCellValueFactory(new PropertyValueFactory<>(prop));

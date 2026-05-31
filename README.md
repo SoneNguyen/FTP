@@ -1,3 +1,5 @@
+I confirm that this submission is my own work. I did not copy code from AI tools, classmates, or online repositories.
+
 # FTP Client - README
 
 ## What this is
@@ -61,12 +63,6 @@ A login window will open. Enter the FTP server hostname, your username and passw
 
 ### Public FTP server to test with
 
-You can test with `ftp.gnu.org` using anonymous login:
-
-- Host: `ftp.gnu.org`
-- Username: `anonymous`
-- Password: (anything, e.g. your email)
-
 ---
 
 ## What you can do in the GUI
@@ -105,4 +101,5 @@ FTP_Server/
 
 - Only supports passive mode (PASV) for data connections — no active mode
 - Cannot download or upload entire folders, only individual files
-- The PASV IP from the server is ignored; the control connection's address is used instead (this is normal and handles NAT correctly)
+- The PASV IP from the server is ignored; the control connection's address is used instead (this is normal and handles NAT correctly
+
