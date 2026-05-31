@@ -1,7 +1,7 @@
 package gui;
 
 import ftp.Client;
-import ftp.Exception;
+import ftp.ClientException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -163,7 +163,7 @@ public class App extends Application {
                         stage.setWidth(1050);
                         stage.setHeight(680);
                     });
-                } catch (Exception ex) {
+                } catch (ClientException ex) {
                     // server said no (e.g. 530 wrong password)
                     Platform.runLater(() -> {
                         errLbl.setStyle("-fx-text-fill: #cc0000; -fx-font-family: 'Monospaced'; -fx-font-size: 11;");
